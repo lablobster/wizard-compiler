@@ -33,6 +33,7 @@ app.post("/compile", (req, res) => {
           enabled: true,
           runs: 200,
         },
+        evmVersion: "paris",
         outputSelection: {
           "*": {
             "*": ["*"],
