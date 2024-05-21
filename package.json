@@ -4,5 +4,8 @@
     "cors": "^2.8.5",
     "express": "^4.19.2",
     "solc": "^0.8.25"
+  },
+  "scripts": {
+    "vercel-build": "yarn install"
   }
 }

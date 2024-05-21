@@ -11,7 +11,7 @@ app.use(cors());
 
 const findImports = (importPath) => {
   try {
-    const fullPath = path.resolve(__dirname, "node_modules", importPath);
+    const fullPath = path.resolve(__dirname, "../node_modules", importPath);
     const content = fs.readFileSync(fullPath, "utf8");
     return { contents: content };
   } catch (e) {
