@@ -7,7 +7,7 @@ const app = express();
 const port = 3000;
 
 // Allow requests only from a specific domain
-const allowedOrigins = ["https://www.metio.lat"];
+const allowedOrigins = ["https://www.metio.lat", "https://metio.lat/"];
 
 const corsOptions = {
   origin: (origin, callback) => {
