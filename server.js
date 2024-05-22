@@ -7,20 +7,22 @@ const app = express();
 const port = 3000;
 
 // Allow requests only from a specific domain
-const allowedOrigins = ["https://www.metio.lat", "https://metio.lat/"];
+// const allowedOrigins = ["https://www.metio.lat", "https://metio.lat/"];
 
-const corsOptions = {
-  origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
-};
+// const corsOptions = {
+//   origin: (origin, callback) => {
+//     if (!origin || allowedOrigins.includes(origin)) {
+//       callback(null, true);
+//     } else {
+//       callback(new Error("Not allowed by CORS"));
+//     }
+//   },
+// };
 
 app.use(express.json());
-app.use(cors(corsOptions));
+app.use(cors());
+// app.use(cors(corsOptions));
+
 const findImports = (importPath) => {
   try {
     // Adjust the path to use the local @openzeppelin directory in the project root
