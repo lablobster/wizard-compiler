@@ -3,29 +3,15 @@ const solc = require("solc");
 const cors = require("cors");
 const fs = require("fs");
 const path = require("path");
+const { ethers } = require("ethers");
 const app = express();
 const port = 3000;
 
-// Allow requests only from a specific domain
-// const allowedOrigins = ["https://www.metio.lat", "https://metio.lat/"];
-
-// const corsOptions = {
-//   origin: (origin, callback) => {
-//     if (!origin || allowedOrigins.includes(origin)) {
-//       callback(null, true);
-//     } else {
-//       callback(new Error("Not allowed by CORS"));
-//     }
-//   },
-// };
-
 app.use(express.json());
 app.use(cors());
-// app.use(cors(corsOptions));
 
 const findImports = (importPath) => {
   try {
-    // Adjust the path to use the local @openzeppelin directory in the project root
     const fullPath = path.resolve(__dirname, "./", importPath);
     console.log(`Attempting to read file from path: ${fullPath}`);
     const content = fs.readFileSync(fullPath, "utf8");
@@ -38,13 +24,14 @@ const findImports = (importPath) => {
 
 app.get("/", (req, res) => res.send("Wizzard Compiler API"));
 
-app.post("/compile", (req, res) => {
+app.post("/compile", async (req, res) => {
   try {
+    const { code, address } = req.body;
     const input = {
       language: "Solidity",
       sources: {
         "Contract.sol": {
-          content: req.body.code,
+          content: code,
         },
       },
       settings: {
@@ -70,9 +57,27 @@ app.post("/compile", (req, res) => {
     }
 
     const contractFile = output.contracts["Contract.sol"];
-    const compiledContract = contractFile[Object.keys(contractFile)[0]];
+    const contractName = Object.keys(contractFile)[0];
+    const compiledContract = contractFile[contractName];
 
-    res.json(compiledContract);
+    const abi = compiledContract.abi;
+    const bytecode = compiledContract.evm.bytecode.object;
+
+    const constructor = abi.find((item) => item.type === "constructor");
+
+    let deployData;
+    if (constructor && constructor.inputs.length > 0) {
+      const constructorArgs = constructor.inputs.map(() => address);
+      const factory = new ethers.ContractFactory(abi, bytecode);
+      const deployTransaction = await factory.getDeployTransaction(
+        ...constructorArgs
+      );
+      deployData = deployTransaction.data;
+    } else {
+      deployData = `0x${bytecode}`;
+    }
+
+    res.json({ deployData });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "ERROR" });
