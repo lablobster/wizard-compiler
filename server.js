@@ -64,20 +64,21 @@ app.post("/compile", async (req, res) => {
     const bytecode = compiledContract.evm.bytecode.object;
 
     const constructor = abi.find((item) => item.type === "constructor");
-
     let deployData;
+    let constructorArgs;
     if (constructor && constructor.inputs.length > 0) {
-      const constructorArgs = constructor.inputs.map(() => address);
+      constructorArgs = constructor.inputs.map(() => address);
       const factory = new ethers.ContractFactory(abi, bytecode);
       const deployTransaction = await factory.getDeployTransaction(
         ...constructorArgs
       );
+      console.log(constructorArgs);
       deployData = deployTransaction.data;
     } else {
       deployData = `0x${bytecode}`;
     }
 
-    res.json({ deployData });
+    res.json({ abi, deployData, constructorArgs });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "ERROR" });
